@@ -1,3 +1,42 @@
+# Bài Học 11: Các Giao Thức Định Tuyến Động - "Hoa Tiêu" Tự Động Của Mạng 🧭🤖
+
+## Mục Tiêu Bài Học
+
+*   Hiểu mục đích và lợi ích của việc sử dụng Giao thức Định tuyến Động (Dynamic Routing Protocols).
+*   Phân biệt hai nhóm giao thức chính: **IGP (Interior Gateway Protocol)** và **EGP (Exterior Gateway Protocol)**.
+*   Phân biệt hai loại thuật toán định tuyến động phổ biến trong IGP: **Distance Vector (Vector Khoảng cách)** và **Link-State (Trạng thái Đường liên kết)**.
+*   Nắm được nguyên lý hoạt động cơ bản, ưu điểm, nhược điểm của các giao thức tiêu biểu:
+    *   Distance Vector: **RIP (Routing Information Protocol)**, **EIGRP (Enhanced Interior Gateway Routing Protocol - Lai)**
+    *   Link-State: **OSPF (Open Shortest Path First)**, **IS-IS (Intermediate System to Intermediate System)**
+*   Hiểu vai trò và tầm quan trọng của **BGP (Border Gateway Protocol)** - Giao thức EGP chủ đạo của Internet.
+
+## Nội Dung Chi Tiết
+
+### 1. Tại Sao Cần Giao Thức Định Tuyến Động?
+
+Như đã học ở bài trước, định tuyến tĩnh (Static Routing) có những hạn chế lớn về khả năng mở rộng và tính linh hoạt, đặc biệt trong các mạng lớn hoặc thường xuyên thay đổi. Giao thức Định tuyến Động ra đời để giải quyết các vấn đề này bằng cách cho phép các Router:
+
+*   **Tự động khám phá mạng:** Router tự động "học" về cấu trúc mạng từ các Router láng giềng.
+*   **Tự động cập nhật Bảng Định Tuyến:** Khi có thay đổi trong mạng (link up/down, thêm/xóa mạng), thông tin sẽ được lan truyền và các Router tự động tính toán lại đường đi tốt nhất.
+*   **Tự động chọn đường đi dự phòng (Convergence):** Khi đường đi chính gặp sự cố, Router có thể nhanh chóng chuyển sang đường đi thay thế đã được tính toán trước (nếu có), giảm thiểu thời gian gián đoạn mạng. Quá trình mạng đạt được trạng thái ổn định sau thay đổi gọi là **hội tụ (convergence)**.
+
+### 2. Phân Loại: IGP vs. EGP
+
+Việc định tuyến trên Internet và trong các mạng lớn được chia thành hai cấp độ, tương ứng với hai loại giao thức:
+
+*   **IGP (Interior Gateway Protocol - Giao thức Cổng Nội bộ):**
+    *   **Mục đích:** Được sử dụng để trao đổi thông tin định tuyến **bên trong một Hệ thống Tự trị (Autonomous System - AS)**.
+    *   **AS (Autonomous System):** Là một tập hợp các mạng và Router hoạt động dưới cùng một quyền quản trị và có chung một chính sách định tuyến (ví dụ: mạng của một công ty, một trường đại học, một nhà cung cấp dịch vụ ISP nhỏ). Mỗi AS được cấp một số hiệu duy nhất (ASN).
+    *   **Mục tiêu chính của IGP:** Tìm đường đi **nhanh nhất và hiệu quả nhất** (thường dựa trên metric như hop count, cost/bandwidth) để chuyển tiếp Packet bên trong AS.
+    *   **Ví dụ phổ biến:** RIP, EIGRP, OSPF, IS-IS.
+
+*   **EGP (Exterior Gateway Protocol - Giao thức Cổng Ngoại vi):**
+    *   **Mục đích:** Được sử dụng để trao đổi thông tin định tuyến **giữa các Hệ thống Tự trị (AS)** khác nhau.
+    *   **Mục tiêu chính của EGP:** Không chỉ tìm đường đi, mà còn phải **thực thi các chính sách định tuyến (Routing Policies)** phức tạp giữa các tổ chức. Ví dụ: ISP A có thể muốn ưu tiên gửi traffic qua ISP B hơn là ISP C vì lý do thỏa thuận kinh doanh, ngay cả khi đường qua ISP C có vẻ "ngắn hơn" về mặt kỹ thuật.
+    *   **Giao thức EGP chủ đạo hiện nay:** Chỉ có một giao thức thống trị là **BGP (Border Gateway Protocol)**. BGP là "giao thức định tuyến của Internet".
+
+**Tóm lại:** IGP lo việc "trong nhà" (nội bộ AS), EGP lo việc "ngoại giao" (giữa các AS).
+
   +-------------------+          +-------------------+
   |       AS 100      |          |       AS 200      |
   |   (e.g., Your ISP)|          |   (e.g., Another ISP)|
