@@ -37,20 +37,6 @@ Việc định tuyến trên Internet và trong các mạng lớn được chia 
 
 **Tóm lại:** IGP lo việc "trong nhà" (nội bộ AS), EGP lo việc "ngoại giao" (giữa các AS).
 
-  +-------------------+          +-------------------+
-  |       AS 100      |          |       AS 200      |
-  |   (e.g., Your ISP)|          |   (e.g., Another ISP)|
-  |  +--+ OSPF +--+   |  BGP Peering  |   +--+ OSPF +--+   |
-  |  |R1|------|R2|----------//----------|R3|------|R4|   |
-  |  +--+      +--+   | Link       |   +--+      +--+   |
-  |   | \      / |    |          |    | \      / |    |
-  | OSPF \    / EIGRP |          |    | OSPF\    / RIP |    |
-  |   |   +--+   |    |          |    |   +--+   |    |
-  |   `---|R5|---'    |          |    |   |R6|---'    |
-  |       +--+        |          |    |   +--+        |
-  |    IGP Protocols  |          |    |  IGP Protocols  |
-  +-------------------+          +-------------------+
-        <-------------- EGP (BGP) -------------->
 
   
 ### 3. Phân Loại Thuật Toán trong IGP: Distance Vector vs. Link-State
