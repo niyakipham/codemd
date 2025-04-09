@@ -27,23 +27,6 @@ Có hai mô hình tham chiếu chính: OSI và TCP/IP.
 
 Do Tổ chức Tiêu chuẩn hóa Quốc tế (ISO) phát triển, gồm 7 tầng. Đây là mô hình lý thuyết, chuẩn mực, giúp hiểu rõ chức năng từng lớp.
 
-+---------------------+ +---------------------+
-| 7. Application | ----> | Dữ liệu người dùng|
-+---------------------+ +---------------------+ ⬆️ Encapsulation
-| 6. Presentation | ----> | Dữ liệu định dạng| ⬇️ Decapsulation
-+---------------------+ +---------------------+
-| 5. Session | ----> | Dữ liệu phiên |
-+---------------------+ +---------------------+
-| 4. Transport | ----> | Segment/Datagram| (+ TCP/UDP Header)
-+---------------------+ +---------------------+
-| 3. Network | ----> | Packet | (+ IP Header)
-+---------------------+ +---------------------+
-| 2. Data Link | ----> | Frame | (+ MAC Header/Trailer)
-+---------------------+ +---------------------+
-| 1. Physical | ----> | Bits | (Tín hiệu điện/quang...)
-+---------------------+ +---------------------+
-Mô hình OSI Đơn vị dữ liệu (PDU)
-
 *   **Tầng 7: Application (Ứng dụng):** Cung cấp giao diện cho người dùng và các ứng dụng truy cập vào mạng (HTTP, FTP, SMTP, DNS...). *"Cánh cửa" vào mạng.*
 *   **Tầng 6: Presentation (Trình diễn):** Đảm bảo dữ liệu từ tầng Ứng dụng của máy gửi có thể được hiểu bởi tầng Ứng dụng của máy nhận. Chịu trách nhiệm **định dạng dữ liệu, mã hóa/giải mã, nén/giải nén.** *"Người phiên dịch" của mạng.*
 *   **Tầng 5: Session (Phiên):** Thiết lập, quản lý và kết thúc các **phiên (session)** giao tiếp giữa hai máy. Đảm bảo dữ liệu của các ứng dụng khác nhau không bị lẫn lộn. *"Người quản lý cuộc hội thoại."*
