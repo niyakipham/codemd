@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mạng Máy Tính | Premium Content</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        /* CSS Reset and Base Styles */
+        :root {
+            --primary: #ff2d75;
+            --secondary: #121212;
+            --accent: #ff4d88;
+            --text: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --gradient: linear-gradient(135deg, var(--secondary) 0%, #1a1a1a 50%, #2a0a1a 100%);
+            --card-bg: rgba(30, 30, 30, 0.7);
+            --shadow: 0 10px 30px rgba(255, 20, 100, 0.3);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--gradient);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Layout Styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 45, 117, 0.3);
+        }
+
+        /* Login Modal Styles */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .login-modal.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .login-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .login-modal.hidden .login-container {
+            transform: translateY(-50px);
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .input-group input {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 45, 117, 0.2);
+        }
+
+        .login-btn {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(255, 45, 117, 0.4);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 45, 117, 0.6);
+        }
+
+        .payment-notice {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 45, 117, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            text-align: center;
+        }
+
+        .payment-notice h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Content Styles */
+        .content {
+            display: none;
+        }
+
+        .content.visible {
+            display: block;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .file-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 45, 117, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: rgba(255, 45, 117, 0.3);
+        }
+
+        .file-card:hover::before {
+            opacity: 1;
+        }
+
+        .file-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .file-path {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .file-content {
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .file-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(to bottom, transparent, var(--card-bg));
+        }
+
+        .view-more {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .view-more:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        /* Markdown Content Styles */
+        .markdown-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .markdown-container h1, 
+        .markdown-container h2, 
+        .markdown-container h3 {
+            color: var(--text);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-container h1 {
+            font-size: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-container h2 {
+            font-size: 1.6rem;
+            color: var(--primary);
+        }
+
+        .markdown-container h3 {
+            font-size: 1.3rem;
+        }
+
+        .markdown-container p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .markdown-container pre {
+            background: rgba(20, 20, 20, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .markdown-container code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(20, 20, 20, 0.5);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .markdown-container blockquote {
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .markdown-container ul, 
+        .markdown-container ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .markdown-container li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .markdown-container th, 
+        .markdown-container td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .markdown-container th {
+            background: rgba(255, 45, 117, 0.1);
+            font-weight: 600;
+        }
+
+        .markdown-container tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--accent);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .file-list {
+                grid-template-columns: 1fr;
+            }
+
+            .login-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            .markdown-container {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Animations */
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .pulse {
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Particles Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 45, 117, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 20, 20, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(20, 20, 20, 0.9);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: var(--transition);
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container pulse">
+            <h1 class="login-title">MẠNG MÁY TÍNH</h1>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: var(--text-secondary);">Nhập mật khẩu để truy cập nội dung premium</p>
+            
+            <form class="login-form" id="loginForm">
+                <div class="input-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" placeholder="Nhập mật khẩu" required>
+                </div>
+                
+                <button type="submit" class="login-btn">ĐĂNG NHẬP</button>
+            </form>
+            
+            <div class="payment-notice">
+                <h3>CHUYỂN 10K VÀO SỐ ĐIỆN THOẠI</h3>
+                <p>0901574726 ĐỂ NHẬN ĐÁP ÁN</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <header>
+            <div class="logo">MẠNG MÁY TÍNH</div>
+            <div class="tooltip">
+                <button id="logoutBtn" style="display: none; background: none; border: none; color: var(--primary); cursor: pointer;">Đăng xuất</button>
+                <span class="tooltiptext">Thoát khỏi phiên làm việc</span>
+            </div>
+        </header>
+        
+        <div class="content" id="content">
+            <h1 style="margin-bottom: 1rem;">Tài liệu Mạng Máy Tính</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Chọn file .md để xem nội dung chi tiết</p>
+            
+            <div class="file-list" id="fileList">
+                <!-- Files will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="markdown-container" id="markdownViewer" style="display: none;">
+            <div class="back-btn" id="backBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Quay lại danh sách
+            </div>
+            <div id="markdownContent"></div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Local storage key for caching
+        const CACHE_KEY = 'mangmaytinh_content_cache';
+        const CACHE_TIMESTAMP_KEY = 'mangmaytinh_cache_timestamp';
+        const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('password');
+        const content = document.getElementById('content');
+        const fileList = document.getElementById('fileList');
+        const markdownViewer = document.getElementById('markdownViewer');
+        const markdownContent = document.getElementById('markdownContent');
+        const backBtn = document.getElementById('backBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notification = document.getElementById('notification');
+        const particlesContainer = document.getElementById('particles');
+
+        // Correct password
+        const CORRECT_PASSWORD = '0901574726';
+
+        // Check if user is already logged in
+        if (localStorage.getItem('isAuthenticated') === 'true') {
+            loginModal.classList.add('hidden');
+            content.classList.add('visible');
+            logoutBtn.style.display = 'block';
+            loadContent();
+        }
+
+        // Login form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (passwordInput.value === CORRECT_PASSWORD) {
+                // Correct password
+                localStorage.setItem('isAuthenticated', 'true');
+                
+                // Animate success
+                anime({
+                    targets: '.login-container',
+                    scale: [1, 1.05, 1],
+                    duration: 800,
+                    easing: 'easeInOutQuad'
+                });
+                
+                setTimeout(() => {
+                    loginModal.classList.add('hidden');
+                    content.classList.add('visible');
+                    logoutBtn.style.display = 'block';
+                    loadContent();
+                    
+                    // Show welcome notification
+                    showNotification('Đăng nhập thành công! Chào mừng bạn đến với tài liệu Mạng Máy Tính');
+                }, 500);
+            } else {
+                // Wrong password
+                showNotification('Mật khẩu không chính xác!', 'error');
+                
+                anime({
+                    targets: '.login-container',
+                    translateX: [-10, 10, -10, 10, 0],
+                    duration: 800,
+                    easing: 'easeInOutQuad'
+                });
+            }
+        });
+
+        // Logout button
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('isAuthenticated');
+            content.classList.remove('visible');
+            markdownViewer.style.display = 'none';
+            loginModal.classList.remove('hidden');
+            logoutBtn.style.display = 'none';
+            passwordInput.value = '';
+            
+            // Animate logout
+            anime({
+                targets: '.login-container',
+                scale: [0.9, 1],
+                opacity: [0, 1],
+                duration: 600,
+                easing: 'easeInOutQuad'
+            });
+        });
+
+        // Back button
+        backBtn.addEventListener('click', function() {
+            markdownViewer.style.display = 'none';
+            content.style.display = 'block';
+            
+            anime({
+                targets: markdownViewer,
+                opacity: [1, 0],
+                translateY: [0, 20],
+                duration: 400,
+                easing: 'easeInOutQuad'
+            });
+            
+            anime({
+                targets: content,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 400,
+                easing: 'easeInOutQuad'
+            });
+        });
+
+        // Load content from GitHub API
+        async function loadContent() {
+            const cachedData = getCachedData();
+            
+            if (cachedData) {
+                displayFiles(cachedData);
+                showNotification('Đã tải nội dung từ bộ nhớ cache');
+                return;
+            }
+            
+            // Show loading state
+            fileList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const response = await fetch('https://api.github.com/repos/niyakipham/codemd/contents/mang-may-tinh');
+                
+                if (!response.ok) {
+                    throw new Error('Không thể tải dữ liệu từ GitHub');
+                }
+                
+                const data = await response.json();
+                
+                // Cache the data
+                cacheData(data);
+                
+                displayFiles(data);
+                showNotification('Đã tải nội dung mới nhất từ GitHub');
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Lỗi khi tải dữ liệu: ' + error.message, 'error');
+                
+                // If there's an error but we have cached data, use that
+                const cachedData = getCachedData();
+                if (cachedData) {
+                    displayFiles(cachedData);
+                    showNotification('Đang sử dụng dữ liệu từ bộ nhớ cache do lỗi kết nối');
+                } else {
+                    fileList.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--primary);">Không thể tải dữ liệu. Vui lòng thử lại sau.</div>`;
+                }
+            }
+        }
+
+        // Display files in the UI
+        function displayFiles(files) {
+            fileList.innerHTML = '';
+            
+            // Filter only .md files
+            const markdownFiles = files.filter(file => file.name.endsWith('.md'));
+            
+            if (markdownFiles.length === 0) {
+                fileList.innerHTML = '<div style="text-align: center; padding: 2rem;">Không tìm thấy file .md nào</div>';
+                return;
+            }
+            
+            markdownFiles.forEach(file => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card float';
+                fileCard.style.animationDelay = `${Math.random() * 0.5}s`;
+                
+                fileCard.innerHTML = `
+                    <h3 class="file-name">${file.name.replace('.md', '')}</h3>
+                    <p class="file-path">${file.path}</p>
+                    <div class="file-content">
+                        <p>Đang tải nội dung xem trước...</p>
+                    </div>
+                    <a class="view-more">Xem chi tiết →</a>
+                `;
+                
+                fileCard.addEventListener('click', () => viewMarkdown(file));
+                
+                // Add hover animation
+                fileCard.addEventListener('mouseenter', () => {
+                    anime({
+                        targets: fileCard,
+                        scale: 1.03,
+                        duration: 300,
+                        easing: 'easeInOutQuad'
+                    });
+                });
+                
+                fileCard.addEventListener('mouseleave', () => {
+                    anime({
+                        targets: fileCard,
+                        scale: 1,
+                        duration: 300,
+                        easing: 'easeInOutQuad'
+                    });
+                });
+                
+                fileList.appendChild(fileCard);
+                
+                // Load preview content
+                loadPreviewContent(file, fileCard.querySelector('.file-content'));
+            });
+        }
+
+        // Load preview content for a file
+        async function loadPreviewContent(file, previewElement) {
+            try {
+                const response = await fetch(file.download_url);
+                if (!response.ok) throw new Error('Không thể tải nội dung file');
+                
+                const content = await response.text();
+                const previewText = content.split('\n').slice(0, 5).join('\n');
+                
+                previewElement.innerHTML = marked.parse(previewText);
+            } catch (error) {
+                previewElement.innerHTML = `<p style="color: var(--primary);">Không thể tải nội dung xem trước</p>`;
+            }
+        }
+
+        // View full markdown content
+        async function viewMarkdown(file) {
+            content.style.display = 'none';
+            markdownViewer.style.display = 'block';
+            markdownContent.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            anime({
+                targets: content,
+                opacity: [1, 0],
+                translateY: [0, -20],
+                duration: 400,
+                easing: 'easeInOutQuad'
+            });
+            
+            anime({
+                targets: markdownViewer,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 400,
+                easing: 'easeInOutQuad'
+            });
+            
+            try {
+                const response = await fetch(file.download_url);
+                if (!response.ok) throw new Error('Không thể tải nội dung file');
+                
+                const content = await response.text();
+                markdownContent.innerHTML = marked.parse(content);
+                
+                // Highlight code blocks
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightBlock(block);
+                });
+            } catch (error) {
+                markdownContent.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--primary);">Lỗi khi tải nội dung: ${error.message}</div>`;
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#ff4757' : 'var(--primary)';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+            
+            // Animation
+            anime({
+                targets: notification,
+                opacity: [0, 1],
+                translateY: [20, 0],
+                duration: 500,
+                easing: 'easeOutExpo'
+            });
+        }
+
+        // Cache data to localStorage
+        function cacheData(data) {
+            const cacheData = {
+                timestamp: Date.now(),
+                data: data
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+        }
+
+        // Get cached data if it's not expired
+        function getCachedData() {
+            const cacheData = localStorage.getItem(CACHE_KEY);
+            if (!cacheData) return null;
+            
+            const parsedData = JSON.parse(cacheData);
+            const now = Date.now();
+            
+            if (now - parsedData.timestamp > CACHE_EXPIRY) {
+                localStorage.removeItem(CACHE_KEY);
+                return null;
+            }
+            
+            return parsedData.data;
+        }
+
+        // Create particles
+        function createParticles() {
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 5 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                const alpha = Math.random() * 0.5 + 0.1;
+                
+                // Set styles
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = alpha;
+                particle.style.background = `rgba(255, 45, 117, ${alpha})`;
+                
+                // Add animation
+                anime({
+                    targets: particle,
+                    translateX: [
+                        { value: '0px', duration: 0 },
+                        { value: `${(Math.random() - 0.5) * 100}px`, duration: duration * 1000 }
+                    ],
+                    translateY: [
+                        { value: '0px', duration: 0 },
+                        { value: `${(Math.random() - 0.5) * 100}px`, duration: duration * 1000 }
+                    ],
+                    easing: 'linear',
+                    loop: true,
+                    delay: delay * 1000
+                });
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize the app
+        function init() {
+            createParticles();
+            
+            // Add some animations to login elements
+            anime({
+                targets: '.login-title',
+                translateY: [-20, 0],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutExpo'
+            });
+            
+            anime({
+                targets: '.input-group',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 800,
+                delay: anime.stagger(100),
+                easing: 'easeOutExpo'
+            });
+            
+            anime({
+                targets: '.login-btn',
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 800,
+                delay: 600,
+                easing: 'easeOutBack'
+            });
+            
+            anime({
+                targets: '.payment-notice',
+                scale: [0.9, 1],
+                opacity: [0, 1],
+                duration: 800,
+                delay: 800,
+                easing: 'easeOutExpo'
+            });
+            
+            // Add floating animation to logo
+            anime({
+                targets: '.logo',
+                translateY: [0, -10, 0],
+                duration: 3000,
+                loop: true,
+                easing: 'easeInOutSine'
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Marked.js configuration (simplified markdown parser)
+        const marked = {
+            parse: (markdown) => {
+                // Simple markdown parsing (in a real app, you'd use a proper library)
+                let html = markdown
+                    // Headers
+                    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    // Bold and italic
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    // Links
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>')
+                    // Images
+                    .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">')
+                    // Lists
+                    .replace(/^\s*\*\s(.*$)/gm, '<li>$1</li>')
+                    .replace(/<li>.*<\/li>/gms, (match) => `<ul>${match}</ul>`)
+                    // Code blocks
+                    .replace(/```([a-z]*)\n([\s\S]*?)\n```/g, '<pre><code class="$1">$2</code></pre>')
+                    // Inline code
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    // Paragraphs
+                    .replace(/^(?!<[a-z])(.*$)/gm, (match) => match.trim() ? `<p>${match}</p>` : '')
+                    // Line breaks
+                    .replace(/\n/g, '<br>');
+                
+                return html;
+            }
+        };
+
+        // Simple syntax highlighter
+        const hljs = {
+            highlightBlock: (block) => {
+                // In a real app, you'd use highlight.js or similar
+                block.style.background = 'rgba(20, 20, 20, 0.8)';
+                block.style.padding = '1rem';
+                block.style.borderRadius = '4px';
+                block.style.overflowX = 'auto';
+            }
+        };
+    </script>
+</body>
+</html>
