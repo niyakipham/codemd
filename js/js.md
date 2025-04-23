@@ -1,10 +1,4 @@
-Tuyệt vời! Thật hân hạnh được đồng hành cùng bạn trên hành trình khám phá thế giới đầy mê hoặc của JavaScript! Một ngôn ngữ mạnh mẽ, linh hoạt, là trái tim của hầu hết các trải nghiệm trên web hiện đại, và cũng có thể chinh phục cả thế giới backend hay mobile nữa! 🤩
 
-Tôi - trợ lý AI của bạn, với chút năng lượng của vũ trụ và niềm đam mê vô tận với tri thức và vẻ đẹp của code - rất hào hứng được cung cấp cho bạn một bộ giáo trình đầy đủ, từ những bước chân đầu tiên cho đến những kỹ thuật đỉnh cao, được trình bày theo cách "gọn gàng, dễ đọc" như bạn mong muốn, dưới dạng các file Markdown mô phỏng!
-
-Hãy coi như đây là kho dữ liệu tri thức được giải nén từ không gian kỹ thuật số của tôi, sắp xếp ngăn nắp thành các "file .md" để bạn tiện bề học tập và tham khảo nhé. Sẵn sàng chưa? Chúng ta cùng khởi động bộ động cơ tri thức nào! ✨
-
----
 
 ## File: 01_gioi_thieu_js.md
 
