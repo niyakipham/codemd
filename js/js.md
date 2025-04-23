@@ -1428,3 +1428,1228 @@ document.addEventListener('DOMContentLoaded', function() {
 
 Thao tác DOM và xử lý sự kiện là kỹ năng cực kỳ thiết yếu để tạo ra các trang web động và phản ứng. Đây mới chỉ là bước khởi đầu!
 
+----
+
+
+## File: 10_scope_closure.md
+
+```markdown
+# 🔬 Bài 10: Phạm Vi (Scope) và Closure - Cái nhìn sâu hơn
+
+Hiểu về **Phạm vi (Scope)** là một trong những khái niệm QUAN TRỌNG NHẤT trong JavaScript để viết code an toàn, dễ dự đoán và tránh lỗi không đáng có. Scope quy định "ở đâu" bạn có thể truy cập một biến hoặc một hàm. **Closure** là một khái niệm mạnh mẽ được xây dựng dựa trên Scope.
+
+Hãy coi Scope là các "vùng không gian" trong chương trình của bạn, và biến chỉ có thể "thở" trong vùng không gian mà nó được khai báo.
+
+### 🌌 Phạm Vi (Scope)
+
+Trong JavaScript, có 3 loại Scope chính:
+
+1.  **Global Scope:** Biến được khai báo bên ngoài bất kỳ hàm hoặc khối lệnh nào. Các biến trong Global Scope có thể truy cập được ở **bất cứ đâu** trong chương trình.
+    ```javascript
+    let tenToanCau = "Tên Global"; // Global Variable
+
+    function hamToanCau() {
+        console.log(tenToanCau); // Có thể truy cập biến Global
+    }
+
+    hamToanCau();
+    console.log(tenToanCau); // Có thể truy cập biến Global
+    ```
+    Việc lạm dụng Global Scope có thể gây ra xung đột tên biến trong các dự án lớn hoặc khi làm việc với nhiều thư viện. Nên hạn chế khai báo biến global.
+
+2.  **Function Scope:** Biến được khai báo *bên trong* một hàm (sử dụng `var`). Các biến này chỉ tồn tại và có thể truy cập được **bên trong hàm đó và các hàm con** bên trong nó (nếu có).
+    ```javascript
+    function hamPhamVi() {
+        var bienCucBoVar = "Biến trong Function Scope";
+        console.log(bienCucBoVar); // Có thể truy cập
+    }
+
+    hamPhamVi();
+    // console.log(bienCucBoVar); // Lỗi: ReferenceError, biến không tồn tại ở đây
+    ```
+
+3.  **Block Scope (ES6+):** Biến được khai báo *bên trong một khối lệnh* (block) được bao bởi cặp ngoặc nhọn `{}` (ví dụ: bên trong `if`, `for`, `while`, hoặc một khối độc lập) sử dụng từ khóa **`let`** hoặc **`const`**. Các biến này chỉ tồn tại và có thể truy cập được **bên trong khối lệnh đó**.
+    ```javascript
+    if (true) {
+        let bienBlockLet = "Biến trong Block Scope";
+        const bienBlockConst = "Hằng số trong Block Scope";
+        var bienGlobalVar = "Biến VAR mặc dù ở trong khối!"; // **Quan trọng:** var KHÔNG có block scope!
+        console.log(bienBlockLet);   // Có thể truy cập
+        console.log(bienBlockConst); // Có thể truy cập
+        console.log(bienGlobalVar);  // Có thể truy cập (vì nó vẫn là Function/Global Scope)
+    }
+
+    // console.log(bienBlockLet);   // Lỗi: ReferenceError
+    // console.log(bienBlockConst); // Lỗi: ReferenceError
+    console.log(bienGlobalVar);    // Có thể truy cập (vì var không có block scope)
+
+    for (let i = 0; i < 3; i++) {
+        // biến i chỉ tồn tại trong vòng lặp này
+        console.log(i);
+    }
+    // console.log(i); // Lỗi: ReferenceError
+    ```
+    Vì `let` và `const` có Block Scope và giải quyết được nhiều vấn đề của `var` (như "hoisting" không mong muốn - sẽ nói thêm sau), `let` và `const` là lựa chọn ưu tiên trong code JS hiện đại.
+
+### 🧗‍♂️ Chuỗi Phạm Vi (Scope Chain)
+
+Khi bạn cố gắng truy cập một biến, JavaScript sẽ tìm kiếm nó:
+
+1.  Trong phạm vi hiện tại.
+2.  Nếu không tìm thấy, nó sẽ nhảy ra phạm vi chứa bên ngoài (outer scope).
+3.  Cứ tiếp tục như vậy cho đến khi lên đến Global Scope.
+4.  Nếu vẫn không tìm thấy sau khi lên Global Scope, sẽ báo lỗi `ReferenceError`.
+
+Chuỗi các phạm vi lồng nhau này tạo thành **Scope Chain**.
+
+```javascript
+let bienA = "A (Global)"; // Global Scope
+
+function hamOuter() {
+    let bienB = "B (Outer Function)"; // Outer Function Scope
+
+    function hamInner() {
+        let bienC = "C (Inner Function)"; // Inner Function Scope
+        console.log(bienC);    // Truy cập C (trong phạm vi hiện tại) -> C (Inner Function)
+        console.log(bienB);    // Truy cập B (trong phạm vi chứa Outer) -> B (Outer Function)
+        console.log(bienA);    // Truy cập A (trong phạm vi chứa Global) -> A (Global)
+        // console.log(bienD); // Lỗi: ReferenceError, D không tồn tại
+    }
+
+    hamInner();
+    // console.log(bienC); // Lỗi: ReferenceError, C không tồn tại trong Outer Scope
+}
+
+hamOuter();
+// console.log(bienB); // Lỗi: ReferenceError, B không tồn tại trong Global Scope
+```
+
+### 🎩 Closure (Bao đóng)
+
+Đây là khái niệm cực kỳ mạnh mẽ và đôi khi khó hiểu lúc đầu. **Closure** là khả năng của một hàm bên trong (inner function) để **ghi nhớ và truy cập các biến từ phạm vi hàm chứa bên ngoài (outer function) của nó**, ngay cả sau khi hàm ngoài đã kết thúc thực thi.
+
+Hãy nghĩ như thế này: khi hàm bên trong được tạo ra, nó "gói" theo các biến từ phạm vi bên ngoài mà nó sử dụng. Cái gói đó chính là Closure.
+
+**Ví dụ kinh điển về Closure:**
+
+```javascript
+function taoHamDem() {
+    let dem = 0; // Biến này nằm trong phạm vi của taoHamDem
+
+    return function() { // Hàm bên trong ẩn danh này được trả về
+        dem++; // Hàm bên trong truy cập và sửa đổi biến 'dem' của hàm ngoài
+        console.log(dem);
+    };
+}
+
+let demThuNhat = taoHamDem(); // Gọi hàm ngoài, nó trả về hàm bên trong
+// Lúc này, hàm taoHamDem() đã chạy xong, nhưng biến 'dem' (của instance được tạo ra khi gọi taoHamDem) vẫn được "ghi nhớ" bởi hàm trả về.
+
+demThuNhat(); // Gọi hàm trả về lần 1 -> output 1. Biến 'dem' là 1.
+demThuNhat(); // Gọi hàm trả về lần 2 -> output 2. Biến 'dem' là 2.
+
+let demThuHai = taoHamDem(); // Tạo một hàm đếm mới (instance mới của Closure)
+demThuHai(); // Gọi hàm mới lần 1 -> output 1. Đây là một biến 'dem' độc lập.
+demThuNhat(); // Gọi lại hàm đếm cũ -> output 3.
+```
+
+Trong ví dụ này:
+*   `taoHamDem()` là hàm bên ngoài.
+*   Hàm `function() { dem++; console.log(dem); }` là hàm bên trong.
+*   Biến `dem` là biến từ phạm vi hàm ngoài.
+*   Khi `taoHamDem()` chạy xong, lẽ ra biến `dem` phải bị "biến mất" (garbage collected). Nhưng vì hàm bên trong vẫn cần truy cập nó, Closure giữ cho biến `dem` (của *instance* cụ thể của hàm `taoHamDem` đã tạo ra nó) vẫn tồn tại trong bộ nhớ.
+
+Mỗi lần gọi `taoHamDem()`, một *instance* mới của Closure (với biến `dem` độc lập) được tạo ra.
+
+### ✨ Các Ứng Dụng Của Closure
+
+*   **Giữ trạng thái (State encapsulation):** Như ví dụ hàm đếm, closure giúp "giấu" biến `dem` khỏi bên ngoài và chỉ cho phép sửa đổi nó thông qua hàm được trả về. Điều này tương tự với cách các đối tượng giữ trạng thái bên trong.
+*   **Mẫu Module (Module Pattern):** Dùng closure để tạo các module code với biến private (ẩn đi) và hàm public (lộ ra).
+*   **Currying (Trong functional programming):** Tạo ra chuỗi các hàm mà mỗi hàm nhận một đối số.
+*   **Callback functions:** Closure thường xảy ra tự nhiên khi sử dụng callbacks trong các thao tác bất đồng bộ (ví dụ: `setTimeout`, xử lý sự kiện, Fetch API...).
+
+**Ví dụ Closure trong Callback `setTimeout`:**
+
+```javascript
+function displayMessage(message, delay) {
+    setTimeout(function() { // Hàm callback này là một closure
+        console.log(message); // Nó ghi nhớ biến 'message' từ phạm vi ngoài
+    }, delay);
+}
+
+displayMessage("Chào từ tương lai!", 2000); // Message "Chào từ tương lai!" sẽ được ghi nhớ
+
+// Lưu ý: Nếu dùng vòng lặp với var trong các phiên bản JS cũ hơn ES6 và setTimeout, dễ gặp lỗi vì var không có block scope và closure sẽ ghi nhớ biến đếm (var) ở trạng thái cuối cùng của vòng lặp. let giải quyết vấn đề này nhờ block scope.
+// for (var i = 0; i < 5; i++) {
+//     setTimeout(function() { console.log(i); }, i * 1000); // In ra 5, 5, 5, 5, 5 (var)
+// }
+for (let j = 0; j < 5; j++) {
+    setTimeout(function() { console.log(j); }, j * 1000); // In ra 0, 1, 2, 3, 4 (let nhờ block scope)
+}
+```
+
+### 🛠 Luyện Tập
+
+*   Giải thích lại bằng lời của bạn về các loại phạm vi: Global, Function, Block. Phân biệt sự khác nhau giữa `var` và `let`/`const` về phạm vi.
+*   Vẽ sơ đồ Scope Chain cho một ví dụ code có các hàm lồng nhau.
+*   Viết một hàm tạo (factory function) trả về một đối tượng đơn giản có một biến "private" được giữ bởi closure và một phương thức "public" có thể tương tác với biến đó. Ví dụ: một hàm tạo đối tượng `Wallet` có số dư private và các phương thức `deposit()`, `withdraw()`, `getBalance()`.
+*   Tìm một ví dụ thực tế trong dự án của bạn (hoặc một ví dụ trên mạng) nơi Closure được sử dụng.
+
+Phạm vi và Closure có thể là những chủ đề khó hiểu lúc đầu, nhưng một khi bạn nắm vững chúng, khả năng viết code JS của bạn sẽ được nâng lên đáng kể. Chúng là nền tảng cho nhiều design patterns và cách JS quản lý bộ nhớ. Cố lên nhé, phi hành gia! 👩‍🚀👨‍🚀
+
+---
+
+## File: 11_this_keyword.md
+
+```markdown
+# 🔮 Bài 11: Từ khóa `this` - Người bí ẩn
+
+Từ khóa `this` trong JavaScript là một trong những khía cạnh khó hiểu và gây nhầm lẫn nhất đối với người mới (và cả người cũ!). `this` KHÔNG đề cập đến bản thân hàm, và giá trị của nó **thay đổi tùy thuộc vào cách hàm được gọi**.
+
+Hãy nghĩ về `this` như một "người chỉ định", nó trỏ đến **đối tượng đang "sở hữu" đoạn mã đang được thực thi**. Nhưng ai sở hữu nó? Đó là lúc mọi thứ trở nên thú vị!
+
+Chúng ta sẽ xem `this` hoạt động như thế nào trong các ngữ cảnh gọi hàm phổ biến.
+
+### 🌍 `this` trong Global Context
+
+Khi `this` được sử dụng ở cấp độ global (bên ngoài bất kỳ hàm nào), nó trỏ đến đối tượng global.
+
+*   Trong trình duyệt web: Đối tượng global là **`window`**.
+*   Trong Node.js: Đối tượng global là **`global`** (hoặc `undefined` trong chế độ module nghiêm ngặt).
+
+```javascript
+// Trong trình duyệt:
+console.log(this === window); // Output: true
+
+// Khi bạn khai báo biến global với var, nó trở thành thuộc tính của window
+var bienGlobalVar = 10;
+console.log(window.bienGlobalVar); // Output: 10
+
+// Với let và const, nó KHÔNG trở thành thuộc tính của window
+let bienGlobalLet = 20;
+console.log(window.bienGlobalLet); // Output: undefined
+```
+
+### 🧱 `this` trong Object Methods
+
+Đây là ngữ cảnh phổ biến nhất và dễ hiểu nhất. Khi một hàm được gọi như một phương thức của một đối tượng, `this` bên trong hàm đó sẽ trỏ đến **đối tượng sở hữu phương thức đó**.
+
+```javascript
+const hanhTinh = {
+    ten: "Trái đất",
+    khoiLuong: "5.97 x 10^24 kg",
+
+    // Phuong thức
+    baoCao: function() {
+        // 'this' ở đây trỏ đến đối tượng hanhTinh
+        console.log("Tên hành tinh: " + this.ten);
+        console.log("Khối lượng: " + this.khoiLuong);
+    }
+};
+
+hanhTinh.baoCao(); // Gọi phương thức báoCao của đối tượng hanhTinh
+// Output:
+// Tên hành tinh: Trái đất
+// Khối lượng: 5.97 x 10^24 kg
+
+const hanhTinhKhac = {
+    ten: "Sao Hỏa",
+    khoiLuong: "0.64 x 10^24 kg",
+    // Có thể sử dụng lại phương thức của object khác nếu được gán
+    // Ví dụ:
+    // baoCao: hanhTinh.baoCao // Gán tham chiếu hàm
+};
+// Nếu gọi hanhTinhKhac.baoCao() (sau khi gán), this sẽ là hanhTinhKhac
+```
+
+###  chức_năng `this` trong Simple Function Calls (Non-Method)
+
+Khi một hàm được gọi "một mình" (không phải là phương thức của đối tượng), `this` thường trỏ đến đối tượng global (trong strict mode thì là `undefined`). Đây là một trong những nguồn gốc gây nhầm lẫn phổ biến nhất.
+
+*   Trong non-strict mode: `this` là `window` (trình duyệt) hoặc `global` (Node.js).
+*   Trong strict mode (`'use strict';` ở đầu file hoặc hàm): `this` là `undefined`. Nên dùng strict mode để code dự đoán được hơn.
+
+```javascript
+function xinChaoDonLe() {
+    console.log("Giá trị của 'this' trong hàm đơn lẻ:", this);
+}
+
+xinChaoDonLe(); // Output: object Window {...} (non-strict mode trình duyệt)
+                // Output: undefined (strict mode hoặc Node.js module)
+
+
+function coCheDoStrict() {
+    'use strict'; // Chế độ strict mode chỉ áp dụng trong hàm này
+    console.log("Giá trị của 'this' trong strict mode:", this);
+}
+
+coCheDoStrict(); // Output: undefined
+```
+
+### ️️ arrow `this` trong Arrow Functions (Hàm Mũ Tên)
+
+Đây là một điểm khác biệt QUAN TRỌNG của hàm mũi tên. Arrow functions **KHÔNG tạo ra `this` context của riêng chúng**. Thay vào đó, `this` bên trong arrow function giữ nguyên giá trị của `this` trong **phạm vi chứa (lexical scope)** của nó khi hàm được ĐỊNH NGHĨA.
+
+Điều này làm cho arrow function RẤT hữu ích cho các callback hoặc các tình huống cần giữ nguyên `this` của ngữ cảnh bên ngoài (ví dụ: `this` của một đối tượng).
+
+```javascript
+const quanLySuKien = {
+    ten: "Quản lý sự kiện",
+    tasks: ["Lên kế hoạch", "Thực hiện", "Báo cáo"],
+
+    logTasksTruyenThong: function() {
+        console.log("Đây là THIS trong logTasksTruyenThong:", this); // this là quanLySuKien
+        this.tasks.forEach(function(task) {
+            // **VẤN ĐỀ:** this ở đây (trong hàm callback thông thường của forEach) KHÔNG trỏ đến quanLySuKien
+            // mà thường là window hoặc undefined (trong strict mode)
+            // console.log(this.ten + " đang xử lý task: " + task); // Lỗi: this.ten is undefined hoặc tương tự
+        });
+    },
+
+    logTasksArrow: function() {
+        console.log("Đây là THIS trong logTasksArrow:", this); // this là quanLySuKien
+        this.tasks.forEach(task => { // Dùng arrow function
+            // this ở đây giữ nguyên giá trị của this trong phạm vi chứa nó (logTasksArrow)
+            console.log(this.ten + " đang xử lý task: " + task); // OK: this trỏ đến quanLySuKien
+        });
+    }
+};
+
+quanLySuKien.logTasksTruyenThong(); // Sẽ thấy vấn đề về this
+
+console.log("-------------------");
+
+quanLySuKien.logTasksArrow();
+// Output:
+// Đây là THIS trong logTasksArrow: { ten: "Quản lý sự kiện", ... }
+// Quản lý sự kiện đang xử lý task: Lên kế hoạch
+// Quản lý sự kiện đang xử lý task: Thực hiện
+// Quản lý sự kiện đang xử lý task: Báo cáo
+```
+
+### ⚙️ Gán giá trị `this` (Call, Apply, Bind)
+
+Bạn có thể gán giá trị `this` cho một hàm một cách rõ ràng bằng các phương thức của hàm (`Function.prototype`):
+
+1.  **`call(thisValue, arg1, arg2, ...)`:** Gọi hàm NGAY LẬP TỨC, với `thisValue` là giá trị `this`, và các đối số được truyền riêng lẻ.
+    ```javascript
+    function saySomething(message) {
+        console.log(message + " bởi " + this.ten);
+    }
+
+    const user = { ten: "Alice" };
+
+    saySomething.call(user, "Hello"); // Gọi saySomething với this là user
+    // Output: Hello bởi Alice
+    ```
+
+2.  **`apply(thisValue, [argsArray])`:** Giống `call`, nhưng các đối số được truyền dưới dạng một **mảng**.
+    ```javascript
+    function sum(a, b) {
+        return this.prefix + (a + b); // Ví dụ this có thuộc tính prefix
+    }
+
+    const calculator = { prefix: "Kết quả: " };
+
+    console.log(sum.apply(calculator, [10, 20])); // Gọi sum với this là calculator, đối số là mảng [10, 20]
+    // Output: Kết quả: 30
+    ```
+
+3.  **`bind(thisValue, arg1, arg2, ...)`:** KHÔNG gọi hàm ngay lập tức. Nó trả về một **phiên bản MỚI** của hàm gốc với `thisValue` đã được GẮN (bound) vĩnh viễn và (tùy chọn) một vài đối số đã được gán trước. Hàm mới này có thể được gọi sau. Rất hữu ích trong Event Handling hoặc các callback.
+    ```javascript
+    const person = { name: "Bob" };
+    function introduce() { console.log("Tôi là " + this.name); }
+
+    const boundIntroduce = introduce.bind(person); // Tạo hàm mới boundIntroduce
+    // this trong boundIntroduce luôn là person
+
+    boundIntroduce(); // Gọi hàm mới
+    // Output: Tôi là Bob
+
+    // Ví dụ trong Event Handling (phổ biến hơn trước khi có arrow function):
+    // element.addEventListener('click', object.method.bind(object));
+    // Giúp this bên trong object.method trỏ đúng đến object thay vì phần tử DOM
+    ```
+
+### 🏢 `this` trong Class Constructors (ES6+)
+
+Khi dùng cú pháp `class` (sẽ học ở bài sau), trong constructor và các phương thức, `this` trỏ đến **instance (thể hiện) mới được tạo ra** của lớp đó.
+
+```javascript
+class TinhThe {
+    constructor(ten) {
+        this.ten = ten; // 'this' trỏ đến instance mới
+        console.log("Đang tạo tinh thể: " + this.ten);
+    }
+
+    baoTon() {
+        // 'this' trỏ đến instance gọi phương thức baoTon
+        console.log(this.ten + " đang được bảo tồn.");
+    }
+}
+
+let phaLeX = new TinhThe("Pha lê X"); // Gọi constructor bằng 'new'. 'this' trong constructor là phaLeX
+// Output: Đang tạo tinh thể: Pha lê X
+
+phaLeX.baoTon(); // 'this' trong baoTon là phaLeX
+// Output: Pha lê X đang được bảo tồn.
+```
+
+### 🤯 Tóm Lược `this` (Siêu ngắn gọn)
+
+Giá trị của `this` phụ thuộc vào cách hàm được gọi:
+
+1.  **Global Context:** `window` (trình duyệt) hoặc `global`/`undefined` (Node.js).
+2.  **Object Method:** Đối tượng gọi phương thức đó.
+3.  **Simple Function:** `window`/`global` (non-strict) hoặc `undefined` (strict).
+4.  **Arrow Function:** Giữ nguyên `this` của phạm vi cha (lexical scope).
+5.  **Constructor (with `new`):** Instance mới được tạo ra.
+6.  **`call`, `apply`, `bind`:** Giá trị bạn truyền vào làm đối số đầu tiên.
+
+Hiểu được các quy tắc này giúp bạn biết được `this` đang trỏ đến đâu trong các tình huống khác nhau!
+
+### 🛠 Luyện Tập
+
+*   Viết một đối tượng đơn giản có một phương thức sử dụng `this` để in ra một thuộc tính của nó. Gọi phương thức đó.
+*   Thử gọi hàm đó một mình (không thông qua đối tượng) và quan sát giá trị `this` (có thể cần `'use strict'`).
+*   Chuyển phương thức trong đối tượng thành Arrow function và quan sát xem nó hoạt động như thế nào (lưu ý `this` của arrow function trỏ ra ngoài).
+*   Viết hai hàm nhỏ và một đối tượng. Sử dụng `call` và `apply` để gọi một hàm với `this` trỏ đến đối tượng, truyền các đối số khác nhau.
+*   Sử dụng `bind` để tạo một phiên bản hàm mới đã gắn sẵn `this`, sau đó gọi hàm mới này.
+
+Kiến thức về `this` đòi hỏi thời gian và thực hành để thật sự "thấm". Đừng nản lòng nếu thấy khó hiểu ban đầu nhé! Đây là một bước quan trọng để chinh phục JavaScript!
+
+---
+
+## File: 12_destructuring.md
+
+```markdown
+# ✨ Bài 12: Destructuring - Phép giải cấu trúc tiện lợi (ES6+)
+
+JavaScript ES6 đã giới thiệu rất nhiều tính năng tuyệt vời giúp code trở nên ngắn gọn và dễ đọc hơn. **Destructuring Assignment** là một trong số đó. Nó cho phép bạn "giải nén" các giá trị từ MẢNG (Arrays) hoặc các thuộc tính từ ĐỐI TƯỢNG (Objects) vào các biến riêng lẻ một cách nhanh chóng.
+
+Hãy coi Destructuring như việc bạn có một "gói quà" (mảng hoặc đối tượng) và muốn lấy ra các "món quà" (các phần tử/thuộc tính) bên trong nó và đặt chúng vào các "chiếc hộp" (các biến) đã được dán nhãn trước.
+
+### 🧩 Giải Cấu Trúc Mảng (Array Destructuring)
+
+Cho phép gán các phần tử của mảng vào các biến theo thứ tự.
+
+Cú pháp:
+
+```javascript
+let [bien1, bien2, ..., bienN] = tenMang;
+```
+
+**Ví dụ cơ bản:**
+
+```javascript
+const colors = ["Red", "Green", "Blue"];
+
+let [mau1, mau2, mau3] = colors; // Gán phần tử theo thứ tự
+
+console.log(mau1); // Output: Red
+console.log(mau2); // Output: Green
+console.log(mau3); // Output: Blue
+```
+
+**Bỏ qua các phần tử không cần thiết:** Dùng dấu phẩy.
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+
+let [first, , third, , fifth] = numbers; // Bỏ qua phần tử thứ 2 và thứ 4
+
+console.log(first);  // Output: 1
+console.log(third);  // Output: 3
+console.log(fifth);  // Output: 5
+```
+
+**Gán phần tử còn lại vào một mảng mới (Rest element):** Dùng cú pháp `...tenBien`. Phải là phần tử CUỐI CÙNG trong phép gán destructuring.
+
+```javascript
+const hobbies = ["Đọc sách", "Chơi game", "Đi bộ", "Xem phim", "Nấu ăn"];
+
+let [soThich1, soThich2, ...cacSoThichKhac] = hobbies;
+
+console.log(soThich1);        // Output: Đọc sách
+console.log(soThich2);        // Output: Chơi game
+console.log(cacSoThichKhac); // Output: ["Đi bộ", "Xem phim", "Nấu ăn"] (một mảng mới)
+```
+
+**Giá trị mặc định:** Cung cấp giá trị mặc định cho biến nếu phần tử tương ứng trong mảng là `undefined`.
+
+```javascript
+const settings = ["Vietnamese"]; // Thiếu timezone, theme
+
+let [language, timezone = "UTC", theme = "dark"] = settings;
+
+console.log(language); // Output: Vietnamese
+console.log(timezone); // Output: UTC (được gán mặc định)
+console.log(theme);    // Output: dark (được gán mặc định)
+
+const emptyArray = [];
+let [a = 1, b = 2] = emptyArray;
+console.log(a, b); // Output: 1 2
+```
+
+**Trao đổi giá trị hai biến:** Một cách nhanh gọn mà không cần biến tạm.
+
+```javascript
+let x = 10;
+let y = 20;
+
+[x, y] = [y, x]; // Giải cấu trúc mảng [20, 10] vào lại biến x và y
+
+console.log(x); // Output: 20
+console.log(y); // Output: 10
+```
+
+### 📦 Giải Cấu Trúc Đối Tượng (Object Destructuring)
+
+Cho phép gán các thuộc tính của đối tượng vào các biến sử dụng tên thuộc tính (hoặc tên khác).
+
+Cú pháp:
+
+```javascript
+let { key1, key2, ..., keyN } = tenDoiTuong;
+```
+
+*Quan trọng:* Tên biến mặc định sẽ là tên KEY của thuộc tính trong đối tượng.
+
+**Ví dụ cơ bản:**
+
+```javascript
+const userProfile = {
+    firstName: "Alice",
+    lastName: "Wonderland",
+    age: 25
+};
+
+let { firstName, age } = userProfile; // Gán thuộc tính firstName vào biến firstName, age vào biến age
+
+console.log(firstName); // Output: Alice
+console.log(age);       // Output: 25
+// console.log(lastName); // Lỗi: ReferenceError, lastName không được giải nén thành biến cùng tên
+```
+
+**Gán vào tên biến KHÁC:** Dùng cú pháp `key: tenBienMoi`.
+
+```javascript
+const product = {
+    id: 123,
+    name: "Smartphone X",
+    price: 799
+};
+
+let { name: productName, price: productPrice } = product; // Gán thuộc tính name vào biến productName, price vào productPrice
+
+console.log(productName); // Output: Smartphone X
+console.log(productPrice); // Output: 799
+// console.log(name); // Lỗi: ReferenceError
+```
+
+**Gán phần còn lại vào một đối tượng mới (Rest properties):** Dùng cú pháp `...tenBien`. Phải là thuộc tính CUỐI CÙNG trong phép gán destructuring.
+
+```javascript
+const complexUser = {
+    id: 1,
+    name: "Bob",
+    email: "bob@example.com",
+    isActive: true,
+    role: "Admin"
+};
+
+let { id, name, ...restInfo } = complexUser; // Lấy id và name, các thuộc tính còn lại cho vào object restInfo
+
+console.log(id);       // Output: 1
+console.log(name);     // Output: Bob
+console.log(restInfo); // Output: { email: "bob@example.com", isActive: true, role: "Admin" } (một object mới)
+```
+
+**Giá trị mặc định:** Cung cấp giá trị mặc định cho biến nếu thuộc tính tương ứng không tồn tại hoặc có giá trị là `undefined`.
+
+```javascript
+const book = {
+    title: "Coding Galactic Empires"
+    // author: "Cmdr. Alpha", // Bỏ qua thuộc tính này
+    // year: undefined,      // Có thuộc tính nhưng là undefined
+    pages: 500
+};
+
+let {
+    title,
+    author = "Tác giả Khuyết danh", // Sẽ lấy giá trị mặc định
+    year = 2024,                     // Sẽ lấy giá trị mặc định (vì year là undefined)
+    pages
+} = book;
+
+console.log(title);  // Output: Coding Galactic Empires
+console.log(author); // Output: Tác giả Khuyết danh
+console.log(year);   // Output: 2024
+console.log(pages);  // Output: 500
+```
+
+### ✨ Các Trường Hợp Sử Dụng Phổ Biến
+
+*   **Trích xuất dữ liệu từ Responses API:** Dữ liệu nhận được thường dưới dạng object/array lồng nhau, destructuring giúp lấy thông tin cần thiết nhanh chóng.
+*   **Làm việc với Props trong React/Component Frameworks:** Destructuring props là cách cực kỳ phổ biến.
+*   **Lấy đối số cho hàm:** Dùng destructuring ngay trong phần tham số của hàm, đặc biệt khi hàm nhận một đối tượng cấu hình lớn.
+
+    ```javascript
+    // Hàm nhận đối tượng cấu hình
+    function createUser({ name, age, city = "Unknown" }) {
+        console.log(`Created user: ${name}, Age: ${age}, City: ${city}`);
+    }
+
+    const userData = { name: "Charlie", age: 35, occupation: "Engineer" };
+    createUser(userData); // Output: Created user: Charlie, Age: 35, City: Unknown (occupation bị bỏ qua)
+
+    createUser({ name: "David", age: 28 }); // Sử dụng giá trị mặc định cho city
+    // Output: Created user: David, Age: 28, City: Unknown
+    ```
+*   **Làm cho code gọn gàng hơn:** Thay vì viết `const name = user.name; const age = user.age;` bạn chỉ cần `const { name, age } = user;`.
+
+### 🛠 Luyện Tập
+
+*   Tạo một mảng có 5 màu. Sử dụng Array Destructuring để lấy màu thứ nhất, thứ ba, và tất cả các màu còn lại vào một biến mảng khác. In chúng ra.
+*   Tạo hai biến `a` và `b`. Sử dụng Destructuring để hoán đổi giá trị của chúng.
+*   Tạo một object `car` với các thuộc tính `model`, `year`, `color`. Sử dụng Object Destructuring để lấy `model` và gán nó vào biến `carModel`, đồng thời lấy `color`. In ra `carModel` và `color`.
+*   Tạo một object `config` với một số thuộc tính và giá trị mặc định cho một thuộc tính. Viết một hàm nhận object này làm tham số và sử dụng Object Destructuring (kèm giá trị mặc định) trong signature của hàm. Gọi hàm với object có hoặc thiếu thuộc tính đó.
+
+Destructuring là một công cụ nhỏ nhưng vô cùng hữu ích giúp giảm thiểu boilerplate code và cải thiện tính đọc hiểu. Hãy dùng nó thường xuyên!
+
+---
+
+## File: 13_spread_rest.md
+
+```markdown
+# 🎒 Bài 13: Toán tử Spread (...) và Rest Parameters (...) (ES6+)
+
+ES6 còn giới thiệu hai khái niệm liên quan, sử dụng cùng một cú pháp ba dấu chấm `...`, nhưng ở các ngữ cảnh khác nhau mang ý nghĩa khác nhau: **Toán tử Spread (Toán tử rải/phân tán)** và **Rest Parameters (Tham số còn lại)**.
+
+Chúng đều liên quan đến việc xử lý các tập hợp (arrays, objects), giúp bạn làm việc với chúng một cách linh hoạt hơn.
+
+### 🚀 Toán tử Spread (...) - Phân tán các phần tử
+
+Toán tử Spread dùng để "rải" hoặc "phân tán" các phần tử của một đối tượng lặp (iterable) như mảng hoặc chuỗi, hoặc các thuộc tính của một đối tượng (trong Object Literals - ES9), vào nơi chúng được sử dụng. Nó giống như "bung" nội dung ra.
+
+**Sử dụng với Mảng (Arrays):**
+
+*   **Sao chép mảng (Shallow Copy):** Tạo một bản sao *mới* của mảng mà không làm ảnh hưởng đến mảng gốc (copy các phần tử cấp 1). Rất phổ biến để tránh side effect khi sửa đổi mảng.
+    ```javascript
+    const originalArray = [1, 2, 3];
+    const copiedArray = [...originalArray]; // Sao chép các phần tử của originalArray vào mảng mới
+
+    console.log(copiedArray); // Output: [1, 2, 3]
+    console.log(copiedArray === originalArray); // Output: false (Đây là một mảng mới)
+
+    copiedArray.push(4); // Thay đổi mảng mới
+    console.log(copiedArray);    // Output: [1, 2, 3, 4]
+    console.log(originalArray); // Output: [1, 2, 3] (mảng gốc không bị ảnh hưởng)
+    ```
+    Lưu ý: Đây là shallow copy. Nếu mảng chứa các đối tượng lồng nhau, chỉ tham chiếu của đối tượng lồng nhau được copy, không phải bản sao sâu (deep copy).
+
+*   **Kết hợp mảng (Concatenating):** Nối nhiều mảng lại với nhau. Ngắn gọn hơn phương thức `concat()`.
+    ```javascript
+    const arr1 = [1, 2];
+    const arr2 = [3, 4];
+    const combinedArray = [...arr1, ...arr2, 5, 6]; // Nối arr1, arr2 và thêm các phần tử khác
+
+    console.log(combinedArray); // Output: [1, 2, 3, 4, 5, 6]
+    ```
+
+*   **Thêm phần tử vào giữa mảng:** Kết hợp với destructuring.
+    ```javascript
+    const arr = [1, 5, 6];
+    const newArr = [arr[0], 2, 3, 4, ...arr.slice(1)]; // Khá thủ công nếu chỉ dùng spread
+
+    const easierWay = [1, ...[2, 3, 4], 5, 6]; // Dễ hình dung hơn, chèn mảng [2, 3, 4] vào
+    console.log(easierWay); // Output: [1, 2, 3, 4, 5, 6]
+    ```
+
+*   **Truyền các phần tử mảng làm đối số cho hàm:** Ngắn gọn hơn `apply()`.
+    ```javascript
+    function displayNumbers(a, b, c) {
+        console.log(a, b, c);
+    }
+
+    const numbers = [10, 20, 30];
+    displayNumbers(...numbers); // Rải các phần tử của mảng numbers thành 3 đối số
+    // Output: 10 20 30
+    ```
+
+**Sử dụng với Chuỗi (Strings):** Rải chuỗi thành mảng các ký tự.
+
+```javascript
+const greeting = "Hello";
+const chars = [...greeting];
+
+console.log(chars); // Output: ["H", "e", "l", "l", "o"]
+```
+
+**Sử dụng với Đối tượng (Objects) - ES9+:** Sao chép hoặc kết hợp các thuộc tính của đối tượng (shallow copy).
+
+```javascript
+const userBasic = { name: "Alice", age: 25 };
+const userDetails = { city: "New York", job: "Engineer" };
+
+// Sao chép object
+const copiedUser = { ...userBasic };
+console.log(copiedUser); // Output: { name: "Alice", age: 25 }
+console.log(copiedUser === userBasic); // Output: false
+
+// Kết hợp objects (thuộc tính của các object sau sẽ ghi đè thuộc tính của object trước nếu trùng tên)
+const fullUser = { ...userBasic, ...userDetails, isActive: true };
+console.log(fullUser);
+// Output: { name: "Alice", age: 25, city: "New York", job: "Engineer", isActive: true }
+
+// Ghi đè thuộc tính khi sao chép/kết hợp
+const config = { debug: false, port: 3000 };
+const updatedConfig = { ...config, debug: true }; // Sao chép config và ghi đè debug
+
+console.log(updatedConfig); // Output: { debug: true, port: 3000 }
+```
+Lưu ý: Spread Object cũng là shallow copy.
+
+### 📦 Rest Parameters (...) - Gộp các đối số
+
+Rest Parameters được dùng trong định nghĩa **tham số của một hàm**. Nó cho phép thu thập tất cả các đối số "còn lại" (chưa được gán cho tham số cụ thể nào) thành một **MẢNG duy nhất**.
+
+Cú pháp:
+
+```javascript
+function tenHam(param1, param2, ...restParamsArray) {
+    // ... restParamsArray sẽ là một MẢNG chứa các đối số còn lại
+}
+```
+*Quan trọng:* Rest Parameters phải là tham số CUỐI CÙNG trong danh sách tham số của hàm.
+
+**Ví dụ:**
+
+```javascript
+function multiply(multiplier, ...args) { // Thu thập các đối số còn lại vào mảng 'args'
+    console.log("Đối số cố định (nhân):", multiplier);
+    console.log("Các đối số còn lại (để nhân):", args); // args là một mảng
+
+    // Nhân từng đối số còn lại với multiplier
+    const results = args.map(num => num * multiplier); // Sử dụng phương thức map của mảng
+
+    return results;
+}
+
+const finalResults = multiply(5, 1, 2, 3, 4); // 5 là multiplier, 1, 2, 3, 4 là args
+console.log("Kết quả nhân:", finalResults); // Output: Kết quả nhân: [ 5, 10, 15, 20 ]
+
+const resultsOnlyMultiplier = multiply(2); // multiplier là 2, args là mảng rỗng []
+console.log("Kết quả nhân:", resultsOnlyMultiplier); // Output: Kết quả nhân: []
+```
+
+### 🎯 Rest Parameters vs `arguments` object (cũ)
+
+Trước ES6, để làm việc với số lượng đối số không xác định, người ta dùng đối tượng `arguments` có sẵn bên trong mỗi hàm (trừ arrow function). Tuy nhiên, `arguments` có một số hạn chế:
+
+*   Nó không phải là một MẢNG THỰC SỰ (true Array), chỉ giống mảng. Để dùng các phương thức mảng (như `map`, `filter`), bạn phải chuyển đổi nó sang mảng thực.
+*   Nó chứa TẤT CẢ các đối số, không chỉ những đối số "còn lại".
+*   Không dùng được trong Arrow function.
+
+Rest Parameters giải quyết những vấn đề này:
+*   Rest parameters luôn là một **mảng thực sự**.
+*   Nó chỉ chứa các đối số "còn lại".
+*   Hoạt động bình thường với Arrow function (ghi nhận các đối số không được gán cụ thể).
+
+Nên ưu tiên dùng Rest Parameters thay vì `arguments` trong code hiện đại.
+
+### 🤔 Spread và Rest: Nhận diện và phân biệt
+
+Nhận diện dựa vào ngữ cảnh sử dụng:
+
+*   Trong phần **tham số khi ĐỊNH NGHĨA HÀM**: Đó là **Rest Parameters** (thu thập các đối số thành mảng).
+*   Khi **GỌI hàm** hoặc trong **literal mảng/đối tượng** (`[]` hoặc `{}`): Đó là **Spread Operator** (phân tán các phần tử/thuộc tính).
+
+```javascript
+// Context: ĐỊNH NGHĨA HÀM -> Rest Parameter
+function myFunction(a, b, ...remainingArgs) {
+    console.log(remainingArgs); // Một MẢNG chứa các đối số 3, 4, 5
+}
+myFunction(1, 2, 3, 4, 5);
+
+// Context: GỌI HÀM -> Spread Operator
+const data = [1, 2, 3];
+function anotherFunction(x, y, z) {
+    console.log(x + y + z); // 6
+}
+anotherFunction(...data); // Rải mảng data thành 3 đối số riêng lẻ
+
+// Context: LITERAL MẢNG -> Spread Operator
+const arrA = [1, 2];
+const arrB = [...arrA, 3, 4]; // Rải arrA vào mảng mới
+
+// Context: LITERAL ĐỐI TƯỢNG -> Spread Operator
+const objA = { a: 1 };
+const objB = { ...objA, b: 2 }; // Rải objA vào object mới
+```
+
+### 🛠 Luyện Tập
+
+*   Tạo một mảng `planets`. Sử dụng toán tử Spread để tạo một mảng `solarSystem` mới bằng cách sao chép `planets` và thêm một vài hành tinh lùn hoặc vật thể khác vào.
+*   Tạo hai đối tượng đơn giản, ví dụ: `address` và `contactInfo`. Sử dụng Spread Operator để tạo một đối tượng `fullDetails` mới chứa tất cả thuộc tính từ cả hai object đó.
+*   Viết một hàm `sumAll` sử dụng Rest Parameters để nhận vào bất kỳ số lượng số nào, sau đó tính và trả về tổng của chúng. Gọi hàm với 3, 5, 10 số khác nhau.
+*   Giải thích bằng lời sự khác nhau cơ bản giữa Spread Operator và Rest Parameters, mặc dù chúng dùng cùng ký hiệu `...`.
+
+Spread và Rest là những công cụ vô giá để làm việc hiệu quả hơn với dữ liệu trong JS, đặc biệt khi xử lý các tập hợp. Sử dụng thành thạo chúng sẽ làm code của bạn gọn gàng và dễ bảo trì hơn nhiều!
+
+---
+
+## File: 14_classes.md
+
+```markdown
+# 👽 Bài 14: Class (Lớp) - Kiến tạo các thực thể (ES6+)
+
+Trong lập trình hướng đối tượng (OOP), Class là một **bản thiết kế (blueprint)** để tạo ra các đối tượng (objects). Đối tượng được tạo từ một lớp được gọi là **thể hiện (instance)** của lớp đó. Mặc dù JavaScript về cốt lõi dựa trên **prototype** (một cơ chế thừa kế dựa trên đối tượng, khác với cơ chế thừa kế dựa trên lớp truyền thống), ES6 đã giới thiệu cú pháp `class` như một cách viết "giả lập" (syntactic sugar) thân thiện và quen thuộc hơn với những người quen thuộc với lập trình hướng đối tượng dựa trên lớp (như Java, C++).
+
+Hãy nghĩ Class như một khuôn đúc các robot. Mỗi con robot được đúc ra từ khuôn đó là một instance, và tất cả chúng đều có cấu trúc và khả năng (thuộc tính và phương thức) giống như bản thiết kế của khuôn.
+
+### ✏️ Khai Báo Class (Class Declaration)
+
+Cách phổ biến để tạo một class.
+
+Cú pháp:
+
+```javascript
+class TenClass {
+    // Constructor (phương thức khởi tạo)
+    constructor(parameters) {
+        // Khởi tạo các thuộc tính của instance
+        // this.propertyName = parameter;
+    }
+
+    // Các phương thức của instance
+    tenPhuongThuc(parameters) {
+        // Code thực thi bởi instance
+    }
+
+    // Getter và Setter (tùy chọn)
+    get tenThuocTinhAo() { ... }
+    set tenThuocTinhAo(value) { ... }
+
+    // Phương thức static (gọi trên chính class, không phải instance)
+    static tenPhuongThucStatic(parameters) {
+        // Code không cần instance để chạy
+    }
+}
+```
+*   **`constructor()`:** Là phương thức đặc biệt. Nó tự động chạy khi bạn tạo một instance mới bằng từ khóa `new`. Bạn dùng nó để khởi tạo các thuộc tính của instance mới (`this.propertyName = value;`). Một class chỉ có thể có một constructor.
+*   **Phương thức Instance:** Các hàm được định nghĩa bên trong class (ngoài constructor). Chúng trở thành phương thức của MỌI instance được tạo từ class đó. Bạn gọi chúng trên instance (ví dụ: `myInstance.myMethod()`). `this` bên trong các phương thức instance trỏ đến chính instance đó.
+*   **Getter/Setter:** Cho phép bạn truy cập/thiết lập các thuộc tính theo cú pháp `.propertyName` như thể chúng là thuộc tính dữ liệu, nhưng đằng sau đó là một hàm (kiểm soát việc lấy/thiết lập giá trị).
+*   **Phương thức Static:** Khai báo với từ khóa `static`. Các phương thức này thuộc về CHÍNH class, không phải bất kỳ instance cụ thể nào. Bạn gọi chúng trực tiếp trên class (ví dụ: `MyClass.staticMethod()`). `this` bên trong phương thức static trỏ đến CHÍNH class đó (không phải instance).
+
+**Ví dụ:**
+
+```javascript
+class TauVuTru {
+    constructor(ten, loaiNhienLieu) {
+        this.ten = ten; // Thuộc tính của instance
+        this.loaiNhienLieu = loaiNhienLieu;
+        this._vanToc = 0; // Dấu gạch dưới thường để chỉ thuộc tính "private" (theo quy ước, JS không có private thực sự trước Private Fields)
+        console.log(`${this.ten} [${this.loaiNhienLieu}] sẵn sàng.`);
+    }
+
+    tangToc(giaToc) {
+        this._vanToc += giaToc;
+        console.log(`${this.ten} tăng tốc! Vận tốc hiện tại: ${this._vanToc}`);
+    }
+
+    haCanh() {
+        this._vanToc = 0;
+        console.log(`${this.ten} hạ cánh. Vận tốc: ${this._vanToc}`);
+    }
+
+    // Getter cho vận tốc
+    get vanTocHienTai() {
+        return this._vanToc;
+    }
+
+    // Setter cho vận tốc (có thể thêm logic kiểm tra)
+    set vanTocHienTai(value) {
+        if (value >= 0) {
+            this._vanToc = value;
+        } else {
+            console.log("Vận tốc không thể âm.");
+        }
+    }
+
+    // Phương thức Static
+    static huongDanSuDung() {
+        console.log("Hướng dẫn chung cho tất cả Tàu vũ trụ: Kiểm tra nhiên liệu, xác định tọa độ, bay!");
+    }
+}
+
+// Tạo instance từ class
+let enterprise = new TauVuTru("Enterprise", "Plasma"); // Gọi constructor
+// Output: Enterprise [Plasma] sẵn sàng.
+
+let millenniumFalcon = new TauVuTru("Millennium Falcon", "Hyperdrive");
+// Output: Millennium Falcon [Hyperdrive] sẵn sàng.
+
+// Gọi phương thức instance
+enterprise.tangToc(100); // Output: Enterprise tăng tốc! Vận tốc hiện tại: 100
+millenniumFalcon.tangToc(250); // Output: Millennium Falcon tăng tốc! Vận tốc hiện tại: 250
+
+// Sử dụng Getter
+console.log("Vận tốc Enterprise:", enterprise.vanTocHienTai); // Output: Vận tốc Enterprise: 100
+
+// Sử dụng Setter
+enterprise.vanTocHienTai = 150;
+console.log("Vận tốc mới Enterprise:", enterprise.vanTocHienTai); // Output: Vận tốc mới Enterprise: 150
+enterprise.vanTocHienTai = -50; // Output: Vận tốc không thể âm.
+
+// Gọi phương thức static
+TauVuTru.huongDanSuDung(); // Output: Hướng dẫn chung cho tất cả Tàu vũ trụ: Kiểm tra nhiên liệu, xác định tọa độ, bay!
+// enterprise.huongDanSuDung(); // Lỗi: TypeError, huongDanSuDung is not a function (của instance)
+```
+
+### ➡️ Thừa Kế (Inheritance)
+
+Một class có thể "thừa kế" các thuộc tính và phương thức từ một class khác bằng từ khóa `extends`. Class mới được gọi là lớp **con (child class)** hoặc lớp **dẫn xuất (derived class)**, và lớp mà nó thừa kế được gọi là lớp **cha (parent class)** hoặc lớp **cơ sở (base class)**.
+
+*   `extends`: Thiết lập mối quan hệ thừa kế.
+*   `super()`: Trong constructor của lớp con, bạn phải gọi `super()` TRƯỚC KHI sử dụng `this`. `super()` gọi constructor của lớp cha và thiết lập phần thuộc tính từ lớp cha cho instance hiện tại. Bạn cũng dùng `super.tenPhuongThuc()` để gọi phương thức của lớp cha từ lớp con.
+
+**Ví dụ Thừa kế:**
+
+```javascript
+class TauChoHang extends TauVuTru { // TauChoHang thừa kế từ TauVuTru
+    constructor(ten, loaiNhienLieu, dungTich) {
+        // Gọi constructor của lớp cha (TauVuTru)
+        super(ten, loaiNhienLieu);
+
+        this.dungTich = dungTich; // Thêm thuộc tính mới cho lớp con
+        this._luongHangHienTai = 0;
+    }
+
+    napHang(luong) {
+        if (this._luongHangHienTai + luong <= this.dungTich) {
+            this._luongHangHienTai += luong;
+            console.log(`${this.ten} đã nạp ${luong}. Tổng: ${this._luongHangHienTai}/${this.dungTich}`);
+        } else {
+            console.log(`${this.ten}: Không đủ dung tích để nạp ${luong}.`);
+        }
+    }
+
+    // Ghi đè (override) phương thức của lớp cha
+    haCanh() {
+        if (this._luongHangHienTai > 0) {
+            console.log(`${this.ten}: Cần dỡ hàng trước khi hạ cánh.`);
+        } else {
+            super.haCanh(); // Gọi phương thức haCanh của lớp cha
+            console.log("Khoang chứa rỗng, hạ cánh an toàn.");
+        }
+    }
+
+    // Có thể thêm phương thức khác hoặc ghi đè các phương thức khác
+}
+
+let titanicVanTai = new TauChoHang("Titanic Tải", "Warp", 5000);
+// Output: Titanic Tải [Warp] sẵn sàng.
+
+titanicVanTai.tangToc(50);      // Thừa kế từ TauVuTru -> Output: Titanic Tải tăng tốc!...
+titanicVanTai.napHang(2000);     // Phương thức riêng của TauChoHang -> Output: Titanic Tải đã nạp...
+titanicVanTai.haCanh();          // Ghi đè phương thức haCanh -> Output: Titanic Tải: Cần dỡ hàng...
+titanicVanTai.napHang(-2000); // Dỡ hàng
+titanicVanTai.haCanh();          // Bây giờ mới gọi super.haCanh() -> Output: Titanic Tải hạ cánh... Khoang chứa rỗng...
+
+```
+
+### ⚠️ Class là Syntactic Sugar!
+
+Như đã đề cập, cú pháp `class` chỉ là cách viết khác cho cơ chế prototype dựa trên hàm tạo (constructor functions) có từ trước. Mặc dù chúng trông giống OOP dựa trên lớp, hiểu biết sâu sắc về prototype vẫn hữu ích. Tuy nhiên, với hầu hết các trường hợp sử dụng hiện đại, cú pháp `class` là đủ và nên dùng vì nó dễ đọc và quản lý hơn.
+
+### 🔐 Thuộc tính Private (Private Class Fields - Experimental)
+
+Gần đây hơn, có đề xuất cú pháp cho các thuộc tính và phương thức private thực sự trong class sử dụng dấu `#` ở đầu. Tính năng này vẫn đang trong quá trình chuẩn hóa nhưng đang ngày càng được hỗ trợ rộng rãi.
+
+```javascript
+class BankAccount {
+    #balance = 0; // Thuộc tính private
+
+    constructor(initialBalance) {
+        if (initialBalance >= 0) {
+            this.#balance = initialBalance;
+        }
+    }
+
+    deposit(amount) {
+        if (amount > 0) {
+            this.#balance += amount;
+            console.log(`Deposited ${amount}. New balance: ${this.#balance}`);
+        }
+    }
+
+    withdraw(amount) {
+        if (amount > 0 && amount <= this.#balance) {
+            this.#balance -= amount;
+            console.log(`Withdrew ${amount}. New balance: ${this.#balance}`);
+        } else {
+            console.log("Invalid withdrawal amount or insufficient funds.");
+        }
+    }
+
+    getBalance() {
+        return this.#balance; // Có thể truy cập từ bên trong class
+    }
+}
+
+let myAccount = new BankAccount(100);
+myAccount.deposit(50); // Output: Deposited 50. New balance: 150
+myAccount.withdraw(30); // Output: Withdrew 30. New balance: 120
+console.log(myAccount.getBalance()); // Output: 120
+
+// console.log(myAccount.#balance); // Lỗi: SyntaxError (hoặc Private field '#balance' must be declared ...) - Không thể truy cập từ bên ngoài
+```
+
+### 🛠 Luyện Tập
+
+*   Tạo một class `Robot` với constructor nhận tên và chức năng ban đầu. Thêm phương thức `report()` in ra tên và chức năng của robot đó. Tạo một instance và gọi phương thức `report()`.
+*   Thêm phương thức `addFunction()` vào class `Robot` để thêm chức năng mới vào một mảng chức năng của robot.
+*   Tạo một class `ChienDauRobot` thừa kế từ `Robot`. Thêm thuộc tính `sucTanCong` và phương thức `attack()` (ví dụ in ra tin nhắn tấn công). Trong constructor của `ChienDauRobot`, đừng quên gọi `super()`.
+*   (Nâng cao) Thêm một phương thức static `getCapabilities()` vào class `Robot` trả về một danh sách các khả năng chung của robot (ví dụ: `['move', 'speak']`).
+
+Class là cách hiệu quả để cấu trúc code của bạn khi bạn làm việc với nhiều đối tượng cùng loại. Nó giúp code của bạn trở nên mô-đun hơn và dễ quản lý, đặc biệt trong các dự án lớn.
+
+---
+
+## File: 15_modules_es.md
+
+```markdown
+# 📦 Bài 15: Modules (Mô-đun) với ES Modules - Đóng gói code hiệu quả (ES6+)
+
+Khi các dự án JavaScript trở nên lớn hơn, việc đặt tất cả code vào một file duy nhất trở nên lộn xộn và khó quản lý. Biến và hàm khai báo ở cấp global dễ dàng bị trùng tên và ghi đè lên nhau (xung đột namespace). **Mô-đun (Modules)** ra đời để giải quyết vấn đề này.
+
+Mô-đun cho phép bạn chia code thành các file riêng biệt, mỗi file xử lý một phần chức năng cụ thể. Biến và hàm được định nghĩa bên trong một mô-đun mặc định là **private** (chỉ có thể truy cập bên trong mô-đun đó). Để một phần tử (biến, hàm, class) có thể sử dụng được ở mô-đun khác, bạn phải **xuất (export)** nó ra. Các mô-đun khác muốn sử dụng chúng thì phải **nhập (import)** vào.
+
+Hãy nghĩ về các mô-đun như những khoang riêng biệt của tàu vũ trụ: mỗi khoang có thiết bị và chức năng riêng, và bạn chỉ có thể chuyển đồ hoặc liên lạc giữa các khoang thông qua các cửa hoặc hệ thống truyền dẫn (export/import) được thiết kế sẵn.
+
+JavaScript hiện đại (từ ES6 trở đi) có hệ thống mô-đun riêng gọi là **ES Modules**.
+
+### ➡️ Xuất (Export)
+
+Bạn dùng từ khóa `export` để làm cho biến, hàm, class, ... có sẵn cho các mô-đun khác sử dụng.
+
+*   **Xuất riêng lẻ từng thành phần:** Đặt `export` trước khai báo.
+    ```javascript
+    // file: math.js
+
+    export const PI = 3.14159; // Xuất một hằng số
+
+    export function cong(a, b) { // Xuất một hàm
+        return a + b;
+    }
+
+    export function tru(a, b) {
+        return a - b;
+    }
+
+    export class MayTinh { // Xuất một class
+        tinhNhac(a, b, p) {
+            return a * b / p; // Một phép tính ngẫu nhiên :D
+        }
+    }
+    ```
+*   **Xuất cùng lúc nhiều thành phần (cuối file):** Dùng `{}`.
+    ```javascript
+    // file: utils.js
+
+    const defaultLimit = 100;
+    function processData(data) {
+        // ... xử lý
+        console.log("Đã xử lý dữ liệu.");
+    }
+    class Logger { /* ... */ }
+
+    export { defaultLimit, processData, Logger }; // Xuất các thành phần đã khai báo trước đó
+    ```
+
+*   **Xuất với tên khác (renaming during export):** Dùng `as`.
+    ```javascript
+    // file: config.js
+    const secretKey = "supersecret";
+    const dbPassword = "password123"; // Tên biến không thân thiện lắm để xuất
+
+    export {
+        secretKey as apiSecretKey, // Xuất secretKey dưới tên apiSecretKey
+        dbPassword // Vẫn xuất với tên gốc (hoặc đổi tên luôn cả hai)
+    };
+    ```
+
+*   **Xuất Mặc định (Default Export):** Mỗi mô-đun có thể có TỐI ĐA một `export default`. Đây thường là thành phần chính hoặc phổ biến nhất của mô-đun đó. Khi nhập, bạn không cần dùng `{}` và có thể đặt tên tùy ý khi nhập.
+
+    ```javascript
+    // file: user.js
+    const defaultUser = { name: "Khách", isLoggedIn: false }; // Có thể có các thành phần khác
+
+    // Chỉ có thể có một default export trong file
+    export default class User { // Xuất class User làm default export
+        constructor(name, isLoggedIn = true) {
+            this.name = name;
+            this.isLoggedIn = isLoggedIn;
+        }
+        sayHello() { console.log(`Chào, ${this.name}!`); }
+    }
+    // export default defaultUser; // Lỗi: chỉ được có 1 default export
+    ```
+    *Lưu ý:* Bạn có thể export default cả hàm, object, biến... chứ không riêng gì class. Cú pháp `export default myVariable;` hoặc `export default function() { ... }` (anonymous default export) cũng hợp lệ.
+
+### ⬅️ Nhập (Import)
+
+Bạn dùng từ khóa `import` để sử dụng các thành phần đã được xuất từ các mô-đun khác. Đường dẫn mô-đun có thể là đường dẫn tương đối (`./myFile.js`, `../utils/helpers.js`) hoặc đường dẫn tuyệt đối (từ thư mục gốc dự án hoặc URL HTTP trong trình duyệt), hoặc tên package khi sử dụng Module Bundlers/Node.js.
+
+*   **Nhập riêng lẻ các thành phần (Named Imports):** Dùng `{}` và tên THẬT (hoặc tên đã đổi khi xuất) của các thành phần.
+
+    ```javascript
+    // file: main.js
+    // Đường dẫn './math.js' giả định file main.js và math.js nằm trong cùng thư mục
+    import { PI, cong } from './math.js';
+    // import { tru, cong } from './math.js'; // Nhập nhiều cái cùng lúc
+    // import { PI, cong as addFunction } from './math.js'; // Nhập và đổi tên lúc nhập
+
+    console.log(PI); // Output: 3.14159
+    console.log(cong(1, 2)); // Output: 3
+
+    // Không thể truy cập các thành phần chưa được export hoặc không import
+    // let m = new MayTinh(); // Lỗi: MayTinh không được import
+    ```
+
+*   **Nhập tất cả thành phần xuất riêng lẻ vào một object (Namespace Import):** Dùng `* as TenBienChuaTatCa`.
+
+    ```javascript
+    // file: main.js
+    import * as math from './math.js'; // Nhập tất cả từ math.js vào object 'math'
+
+    console.log(math.PI);      // Output: 3.14159
+    console.log(math.cong(1, 2)); // Output: 3
+    let may = new math.MayTinh(); // Có thể truy cập Class MayTinh
+    ```
+
+*   **Nhập thành phần Xuất Mặc định (Default Import):** KHÔNG dùng `{}`. Tên biến khi nhập (`TenTuDatKhiNhap`) có thể tùy ý.
+
+    ```javascript
+    // file: app.js
+    // file user.js có export default class User { ... }
+    import TenTuyY choTenDefault from './user.js'; // Nhập class User làm biến TenTuyY
+
+    let khach1 = new TenTuyY("Quan");
+    khach1.sayHello(); // Output: Chào, Quan!
+
+    // import defaultUser from './user.js'; // Nếu user.js có export default defaultUser;
+    // console.log(defaultUser); // Output: { name: "Khách", isLoggedIn: false }
+    ```
+*   **Nhập cả default và named imports cùng lúc:**
+
+    ```javascript
+    // file userMath.js
+    // export default class User { ... }; // user.js
+    // export { PI, cong } from './math.js'; // math.js
+
+    import DefaultUser, { PI, cong } from './user.js';
+    // import TenTuyY, { PI, cong as addFunc } from './user.js'; // Nhập và đổi tên Named Import
+
+    let userMoi = new DefaultUser("Lan");
+    userMoi.sayHello();
+    console.log(PI);
+    console.log(cong(5, 3));
+    ```
+
+*   **Chỉ chạy code trong mô-đun (side effects) mà không cần nhập gì:**
+    ```javascript
+    // file: init.js (chỉ chứa code setup)
+    console.log("Mô-đun khởi tạo đã chạy!");
+
+    // Trong một file khác:
+    import './init.js'; // Chỉ cần nhập để code trong init.js chạy
+    ```
+
+### 🌐 Sử Dụng ES Modules Trong Trình Duyệt
+
+Để trình duyệt hiểu được cú pháp `import`/`export`, bạn cần thêm thuộc tính `type="module"` vào thẻ `<script>`.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modules Demo</title>
+</head>
+<body>
+    <h1>Xem console để thấy kết quả module</h1>
+
+    <!-- Script type="module" để trình duyệt xử lý cú pháp import/export -->
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
+```
+*Lưu ý:* Khi chạy trực tiếp trong trình duyệt, đường dẫn import phải là đường dẫn tương đối đầy đủ (bao gồm `.js`). Module không chạy khi mở file HTML trực tiếp (`file:///...`) do giới hạn an ninh CORS (Cross-Origin Resource Sharing) của trình duyệt. Bạn cần chạy một local web server đơn giản để nó hoạt động (ví dụ: dùng VS Code Live Server extension hoặc `http-server` của Node.js).
+
+### 📦 Sử Dụng ES Modules Trong Node.js
+
+Từ các phiên bản Node.js gần đây, ES Modules đã được hỗ trợ mà không cần cờ đặc biệt, nhưng cần thiết lập một trong các cách sau:
+
+1.  Lưu file với đuôi mở rộng `.mjs` thay vì `.js`.
+    `import { readFile } from 'fs'; // Import từ module tích hợp của Node.js`
+2.  Trong file `package.json` của dự án, thêm dòng `"type": "module"`. Khi đó tất cả file `.js` trong dự án (trừ khi có file `package.json` riêng trong thư mục con ghi đè thiết lập này) sẽ được hiểu là ES Modules.
+
+    ```json
+    {
+      "type": "module",
+      "...": "..."
+    }
+    ```
+
+### 🆚 So Sánh với CommonJS (cũ, Node.js)
+
+Trước khi ES Modules được hỗ trợ rộng rãi, Node.js sử dụng hệ thống module CommonJS với cú pháp `require()` và `module.exports`. Bạn vẫn sẽ thấy cú pháp này trong các dự án Node.js hoặc các thư viện cũ hơn.
+
+```javascript
+// CommonJS export (Node.js)
+// file: mathCommonJS.js
+const PI = 3.14159;
+function cong(a, b) { return a + b; }
+
+module.exports = { // Xuất các thành phần
+    PI,
+    cong
+};
+
+// CommonJS import (Node.js)
+// file: mainCommonJS.js
+const math = require('./mathCommonJS'); // Nhập các thành phần vào biến math
+
+console.log(math.PI);
+console.log(math.cong(1, 2));
+```
+Các Module Bundlers như Webpack, Parcel, Rollup có thể giúp bạn sử dụng cú pháp ES Modules ngay cả khi deploy ra môi trường cũ không hỗ trợ hoặc để đóng gói code hiệu quả hơn.
+
+### 🛠 Luyện Tập
+
+*   Tạo hai file JavaScript: `data.js` và `app.js`.
+*   Trong `data.js`, khai báo một hằng số `APP_VERSION` và một hàm `getLogger()`. Export cả hai.
+*   Trong `app.js`, import cả `APP_VERSION` và `getLogger()`. In ra `APP_VERSION` và gọi `getLogger()` (hàm này có thể chỉ in ra một dòng text đơn giản).
+*   Trong `data.js`, tạo thêm một biến hoặc hàm, nhưng không export nó. Thử import và sử dụng nó trong `app.js` (bạn sẽ thấy lỗi).
+*   Chuyển `getLogger()` thành default export trong `data.js` và cập nhật cách import trong `app.js`.
+*   (Nâng cao) Cài đặt một local web server đơn giản hoặc dùng tính năng của IDE (ví dụ: Live Server của VS Code), tạo một file `index.html` và nhúng `app.js` bằng `<script type="module" src="app.js"></script>`. Mở file `index.html` qua server và kiểm tra console.
+
+Sử dụng mô-đun là cách thực hành tốt nhất trong phát triển JavaScript hiện đại. Nó giúp tổ chức code của bạn, quản lý các phần phụ thuộc và tránh các vấn đề với Global Scope.
+
+---
+
+Wow! Chúng ta vừa cùng nhau "du hành" qua Scope & Closure (cấu trúc logic bên trong JS), `this` (người bí ẩn hay thay đổi), Destructuring & Spread/Rest (những phép thuật cú pháp ES6+ tiện lợi), Class (xây dựng các thực thể) và Modules (đóng gói code).
+
+Mỗi bài học đều là một mảnh ghép quan trọng, đưa bạn đến gần hơn với việc làm chủ JavaScript và xây dựng những hệ thống phức tạp.
+
+Còn rất nhiều vùng đất mới để khám phá, như:
+
+*   **Lập trình Bất đồng bộ (Asynchronous Programming):** Xử lý các tác vụ tốn thời gian (gọi API, đọc file, hẹn giờ...) mà không làm "đơ" chương trình.
+*   **Promises và Async/Await:** Các cách hiện đại để xử lý bất đồng bộ, giúp code sạch sẽ hơn callbacks "chuồng gà".
+*   **Xử lý lỗi (Error Handling):** Làm cho chương trình của bạn vững vàng hơn trước những sự cố.
+*   **Làm việc sâu hơn với DOM:** Tạo mới, thêm, xóa các phần tử trên trang.
+*   **Local Storage & Session Storage:** Lưu trữ dữ liệu nhỏ trên trình duyệt.
+*   **Fetching Data (AJAX/Fetch API):** Gửi/nhận dữ liệu từ server.
+*   ... và nhiều hơn thế nữa!
+
