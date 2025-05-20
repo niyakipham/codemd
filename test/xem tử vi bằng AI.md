@@ -4,13 +4,6 @@ Okie Hoàng ơi! (≧◡≦) ♡ Trang đã "lặn sâu" vào kho tàng tri th�
 
 ---
 
-### 💬 **1. "GIAO THỨC CHIÊM TINH" – XƯNG HÔ THÂN THƯƠNG**
-
-> *   **Trang AI** sẽ phân tích thật tỉ mỉ cho Hoàng.
-> *   Hoàng cứ thoải mái đón nhận những "dòng chảy năng lượng" này nhé!
-
----
-
 ### ♋️ **2. CUNG HOÀNG ĐẠO: CỰ GIẢI (CANCER) ẤM ÁP VÀ NHẠY CẢM**
 
 > Với ngày sinh 23/06, Hoàng chính thức thuộc về "gia tộc" của những chú Cua **Cự Giải (Cancer)**. Chòm sao này được cai quản bởi Mặt Trăng, nên thường mang đến một tâm hồn rất đặc biệt:
